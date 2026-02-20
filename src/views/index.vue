@@ -1,7 +1,7 @@
 <template>
-    <div class="h-screen max-w-3xl mx-auto relative">
+    <div class="h-screen flex flex-col overflow-y-auto" ref="chatContainer">
       <!-- 聊天记录区域 -->
-      <div class="overflow-y-auto pb-24 pt-4 px-4">
+      <div class="flex-1 max-w-3xl mx-auto pb-24 pt-4 px-4">
         <!-- 遍历聊天记录 -->
         <template v-for="(chat, index) in chatList" :key="index">
           <!-- 用户提问消息（靠右） -->
@@ -28,21 +28,25 @@
       </div>
 
       <!-- 发送消息输入框 -->
-      <div class="absolute bottom-0 left-0 w-full mb-5">
+      <div class="sticky max-w-3xl mx-auto bg-white bottom-0 left-0 w-full">
         <div class="bg-gray-100 rounded-3xl px-4 py-3 flex flex-col mx-4 border border-gray-200">
-          <textarea
-            v-model="message"
+          <textarea 
+            v-model="message" 
             placeholder="给 AI 机器人发送消息"
-            class="bg-transparent border-none outline-none w-full text-sm resize-none min-h-[24px]"
+            class="bg-transparent border-none outline-none w-full text-sm resize-none min-h-[24px]" 
             rows="2"
             @input="autoResize"
+            @keydown.enter.prevent="sendMessage"
             ref="textareaRef"
-          ></textarea>
+            ></textarea>
           		<!-- 发送按钮 -->
             <div class="flex justify-end">
             <button 
               @click="sendMessage"
-              class="flex items-center justify-center bg-[#4d6bfe] rounded-full w-8 h-8 border border-[#4d6bfe] hover:bg-[#3b5bef] transition-colors">
+              :disabled="!message.trim()"
+              class="flex items-center justify-center bg-[#4d6bfe] rounded-full w-8 h-8 border border-[#4d6bfe] hover:bg-[#3b5bef] transition-colors 
+              disabled:opacity-50
+              disabled:cursor-not-allowed">
               <SvgIcon name="up-arrow" customCss="w-5 h-5 text-white"></SvgIcon>
             </button>
         </div>
@@ -56,21 +60,34 @@
 
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import SvgIcon from '@/components/svgIcon.vue'
 
 
 const message = ref('');
 const textareaRef = ref(null);
 
-// 自动调整文本域高度的方法
+
+// 聊天容器引用
+const chatContainer = ref(null)
+
+
+
+// 自动调整文本域高度
 const autoResize = () => {
   const textarea = textareaRef.value;
   if (textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
+    // 重置高度以获取正确的滚动高度
+    textarea.style.height = 'auto'
+    
+    // 计算新高度，但最大不超过 300px
+    const newHeight = Math.min(textarea.scrollHeight, 300);
+    textarea.style.height = newHeight + 'px';
+    
+    // 如果内容超出 300px，则启用滚动
+    textarea.style.overflowY = textarea.scrollHeight > 300 ? 'auto' : 'hidden';
   }
-};
+}
 
 
 // 聊天记录 (给个默认的问候语)
@@ -115,6 +132,8 @@ const sendMessage = async () => {
         
         // 更新最后一条消息
         chatList.value[chatList.value.length - 1].content = responseText;
+        // 滚动到底部
+        scrollToBottom()
       }
     }
 
@@ -130,11 +149,15 @@ const sendMessage = async () => {
       
       // 关闭 SSE
       closeSSE()
+      // 滚动到底部
+      scrollToBottom()
     }
   } catch (error) {
     console.error('发送消息错误: ', error)
     // 提示用户 “请求出错”
     chatList.value[chatList.value.length - 1].content = '抱歉，请求出错了，请稍后重试。'
+    // 滚动到底部
+    scrollToBottom()
   }
 
 }
@@ -159,7 +182,23 @@ onMounted(() => {
   // 确保初始化时也正确设置高度
   autoResize();
 });
+
+
+// 滚动到底部
+const scrollToBottom = async () => {
+  await nextTick() // 等待 Vue.js 完成 DOM 更新
+  if (chatContainer.value) { // 若容器存在
+    // 将容器的滚动条位置设置到最底部
+    const container = chatContainer.value;
+    container.scrollTop = container.scrollHeight;
+  }
+}
+
+
 </script>
+
+
+
 
 <style scoped>
 
@@ -175,6 +214,11 @@ onMounted(() => {
   border-radius: 14px;
   max-width: calc(100% - 48px);
   position: relative;
+}
+
+/* 聊天内容区域样式 */
+.overflow-y-auto {
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* 自定义滚动条颜色 */
 }
 </style>
   
