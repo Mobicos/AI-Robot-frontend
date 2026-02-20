@@ -312,11 +312,10 @@ const scrollToBottom = async () => {
 }
 
 :deep(pre) {
-  background-color: #f5f5f5;
+  background-color: #fafafa;
   padding: 1em;
   border-radius: 5px;
   overflow-x: auto;
-  margin: 1em 0;
   max-width: 100%; /* 确保不超过容器宽度 */
   white-space: pre; /* 保持原始格式 */
   word-wrap: normal; /* 不在单词内部换行 */
@@ -338,7 +337,6 @@ const scrollToBottom = async () => {
   background-color: transparent;
   padding: 0;
   border-radius: 0;
-  font-family: monospace;
   font-weight: normal;
   color: #333;
   display: block;
@@ -401,6 +399,73 @@ const scrollToBottom = async () => {
 :deep(ol + p) {
   margin-top: 0.7em;
 }
+
+
+
+/* 代码块包装器样式 */
+:deep(.code-block-wrapper) {
+  margin: 1em 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: #f6f8fa;
+}
+
+/* 代码块头部样式 */
+:deep(.code-header) {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 8px 12px;
+}
+
+/* 语言标签样式 */
+:deep(.code-language-label) {
+    color: rgb(82 82 82);
+    margin-left: 8px;
+    font-size: 12px;
+    line-height: 18px;
+}
+
+/* 代码高亮样式优化 */
+:deep(.hljs) {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+
+/* 复制按钮样式 */
+:deep(.copy-code-btn) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border-radius: 12px;
+  padding: 0 8px;
+  color: #586069;
+  font-size: 12px;
+  height: 28px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+:deep(.copy-code-btn.copied .copy-icon) {
+  fill: #22c55e;
+}
+
+:deep(.copy-code-btn:hover) {
+  background-color: rgb(0 0 0 / 4%);
+}
+
+:deep(.copy-icon) {
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+:deep(.copy-text) {
+  white-space: nowrap;
+}
+
 
 </style>
   
